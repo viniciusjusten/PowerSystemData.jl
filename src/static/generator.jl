@@ -8,6 +8,7 @@ Base.@kwdef mutable struct Generator
     max_active_power::Float64 = Inf # p.u.
     min_reactive_power::Float64 = -Inf # p.u.
     max_reactive_power::Float64 = Inf # p.u.
+    cost::Float64 = 0.0 # $/MWh
 end
 
 function add_generator!(input; kwargs...)
@@ -24,5 +25,6 @@ generator_min_active_power(input, idx::Int) = input.static.generators[idx].min_a
 generator_max_active_power(input, idx::Int) = input.static.generators[idx].max_active_power
 generator_min_reactive_power(input, idx::Int) = input.static.generators[idx].min_reactive_power
 generator_max_reactive_power(input, idx::Int) = input.static.generators[idx].max_reactive_power
+generator_cost(input, idx::Int) = input.static.generators[idx].cost
 
 num_generators(input) = length(input.static.generators)
