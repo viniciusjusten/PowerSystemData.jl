@@ -3,6 +3,8 @@ module PowerSystemData
 using EnumX
 using LinearAlgebra
 
+include("base.jl")
+
 include("static/bus.jl")
 include("static/branch.jl")
 include("static/generator.jl")
@@ -19,6 +21,7 @@ include("input.jl")
 include("basics.jl")
 
 export Input, Static, Dynamic
+export SystemBase, base_frequency, base_power, set_base_frequency!, set_base_power!
 export Bus, BusType, add_bus!, bus_name, bus_type, bus_voltage, bus_voltage_angle, bus_shunt_susceptance,
     bus_min_voltage, bus_max_voltage, num_buses
 export Branch, add_branch!, branch_name, branch_from_bus_idx, branch_to_bus_idx, branch_resistance,

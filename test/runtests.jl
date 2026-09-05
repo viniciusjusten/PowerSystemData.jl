@@ -37,6 +37,22 @@ function build_test_system()
 end
 
 @testset verbose = true "PowerSystemData" begin
+    @testset "system base" begin
+        input = build_test_system()
+
+        @test base_frequency(input) == 60.0
+        @test base_power(input) == 100.0
+
+        set_base_frequency!(input, 50.0)
+        set_base_power!(input, 1000.0)
+        @test base_frequency(input) == 50.0
+        @test base_power(input) == 1000.0
+
+        european = PowerSystemData.Input(; base = SystemBase(; frequency = 50.0, power = 250.0))
+        @test base_frequency(european) == 50.0
+        @test base_power(european) == 250.0
+    end
+
     @testset "static collections" begin
         input = build_test_system()
 
