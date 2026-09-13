@@ -18,18 +18,23 @@ Base.@kwdef mutable struct GeneratorTrip <: Perturbation
     time::Float64 = 0.0 # s
 end
 
-add_perturbation!(input, perturbation::Perturbation) = push!(input.dynamic.perturbations, perturbation)
+add_perturbation!(input, perturbation::Perturbation) =
+    push!(input.dynamic.perturbations, perturbation)
 
 bus_short_circuit_bus_idx(input, idx::Int) = input.dynamic.perturbations[idx].bus_idx
 bus_short_circuit_time(input, idx::Int) = input.dynamic.perturbations[idx].time
-bus_short_circuit_fault_resistance(input, idx::Int) = input.dynamic.perturbations[idx].fault_resistance
-bus_short_circuit_fault_reactance(input, idx::Int) = input.dynamic.perturbations[idx].fault_reactance
-bus_short_circuit_clearing_time(input, idx::Int) = input.dynamic.perturbations[idx].clearing_time
+bus_short_circuit_fault_resistance(input, idx::Int) =
+    input.dynamic.perturbations[idx].fault_resistance
+bus_short_circuit_fault_reactance(input, idx::Int) =
+    input.dynamic.perturbations[idx].fault_reactance
+bus_short_circuit_clearing_time(input, idx::Int) =
+    input.dynamic.perturbations[idx].clearing_time
 
 branch_trip_branch_idx(input, idx::Int) = input.dynamic.perturbations[idx].branch_idx
 branch_trip_time(input, idx::Int) = input.dynamic.perturbations[idx].time
 
-generator_trip_generator_idx(input, idx::Int) = input.dynamic.perturbations[idx].generator_idx
+generator_trip_generator_idx(input, idx::Int) =
+    input.dynamic.perturbations[idx].generator_idx
 generator_trip_time(input, idx::Int) = input.dynamic.perturbations[idx].time
 
 num_perturbations(input) = length(input.dynamic.perturbations)

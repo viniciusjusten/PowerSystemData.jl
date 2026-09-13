@@ -5,7 +5,14 @@ using Test
 function build_test_system()
     input = PowerSystemData.Input()
 
-    add_bus!(input; name = "Bus 1", type = BusType.Slack, voltage = 1.0, min_voltage = 0.9, max_voltage = 1.1)
+    add_bus!(
+        input;
+        name = "Bus 1",
+        type = BusType.Slack,
+        voltage = 1.0,
+        min_voltage = 0.9,
+        max_voltage = 1.1,
+    )
     add_bus!(
         input;
         name = "Bus 2",
@@ -48,7 +55,8 @@ end
         @test base_frequency(input) == 50.0
         @test base_power(input) == 1000.0
 
-        european = PowerSystemData.Input(; base = SystemBase(; frequency = 50.0, power = 250.0))
+        european =
+            PowerSystemData.Input(; base = SystemBase(; frequency = 50.0, power = 250.0))
         @test base_frequency(european) == 50.0
         @test base_power(european) == 250.0
     end
@@ -83,8 +91,14 @@ end
                 transient_reactance = 0.2,
             ),
         )
-        add_dynamic_load!(input, ZConstantLoad(; load_idx = 1, conductance = 0.1, susceptance = 0.05))
-        add_perturbation!(input, BusShortCircuit(; bus_idx = 2, time = 1.0, clearing_time = 1.1))
+        add_dynamic_load!(
+            input,
+            ZConstantLoad(; load_idx = 1, conductance = 0.1, susceptance = 0.05),
+        )
+        add_perturbation!(
+            input,
+            BusShortCircuit(; bus_idx = 2, time = 1.0, clearing_time = 1.1),
+        )
         add_perturbation!(input, BranchTrip(; branch_idx = 1, time = 2.0))
         add_perturbation!(input, GeneratorTrip(; generator_idx = 1, time = 3.0))
 
@@ -128,5 +142,127 @@ end
 
         S = power_injection(v, angle, Y)
         @test S ≈ V .* conj.(I)
+    end
+
+    @testset "from_powermodels" begin
+        data = Dict{String,Any}(
+            "per_unit" => true,
+            "baseMVA" => 100.0,
+            "bus" => Dict{String,Any}(
+                "1" => Dict{String,Any}(
+                    "index" => 1,
+                    "bus_i" => 1,
+                    "bus_type" => 3,
+                    "vm" => 1.0,
+                    "va" => 0.0,
+                    "vmin" => 0.9,
+                    "vmax" => 1.1,
+                ),
+                "2" => Dict{String,Any}(
+                    "index" => 2,
+                    "bus_i" => 2,
+                    "bus_type" => 1,
+                    "vm" => 1.0,
+                    "va" => 0.0,
+                    "bs" => 5.0,
+                    "vmin" => 0.9,
+                    "vmax" => 1.1,
+                ),
+            ),
+            "branch" => Dict{String,Any}(
+                "1" => Dict{String,Any}(
+                    "index" => 1,
+                    "f_bus" => 1,
+                    "t_bus" => 2,
+                    "br_r" => 0.01,
+                    "br_x" => 0.1,
+                    "rate_a" => 1.0,
+                    "tap" => 1.02,
+                    "transformer" => true,
+                ),
+            ),
+            "gen" => Dict{String,Any}(
+                "1" => Dict{String,Any}(
+                    "index" => 1,
+                    "gen_bus" => 1,
+                    "pg" => 1.0,
+                    "qg" => 0.0,
+                    "pmax" => 2.0,
+                    "model" => 2,
+                    "cost" => [0.0, 2000.0, 0.0],
+                ),
+            ),
+            "load" => Dict{String,Any}(
+                "1" => Dict{String,Any}(
+                    "index" => 1,
+                    "load_bus" => 2,
+                    "pd" => 0.8,
+                    "qd" => 0.3,
+                ),
+            ),
+        )
+
+        input = from_powermodels(data)
+
+        @test base_power(input) == 100.0
+        @test num_buses(input) == 2
+        @test num_branches(input) == 1
+        @test num_generators(input) == 1
+        @test num_loads(input) == 1
+
+        @test bus_type(input, 1) == BusType.Slack
+        @test bus_type(input, 2) == BusType.PQ
+        @test bus_shunt_susceptance(input, 2) == 5.0
+
+        @test branch_from_bus_idx(input, 1) == 1
+        @test branch_to_bus_idx(input, 1) == 2
+        @test branch_max_flow(input, 1) == 100.0
+        @test branch_tap_ratio(input, 1) == 1.02
+        @test branch_is_transformer(input, 1) == true
+
+        @test generator_bus_idx(input, 1) == 1
+        @test generator_max_active_power(input, 1) == 2.0
+        @test generator_max_reactive_power(input, 1) == 999.9
+        @test generator_cost(input, 1) == 20.0
+
+        @test load_bus_idx(input, 1) == 2
+        @test load_reactive_power(input, 1) == 0.3
+    end
+
+    @testset "sis45b" begin
+        include(joinpath(@__DIR__, "..", "examples", "sis45b.jl"))
+        input = build_sis45b()
+
+        @test num_buses(input) == 45
+        @test num_branches(input) == 72
+        @test num_generators(input) == 10
+        @test num_loads(input) == 24
+        @test count(i -> bus_type(input, i) == BusType.Slack, 1:num_buses(input)) == 1
+
+        # The case carries the operating point Simulight solved for it, so the
+        # injections implied by Ybus must match generation minus load at every
+        # bus. This is what pins down the conversion out of the .fdx file.
+        v = [bus_voltage(input, i) for i in 1:num_buses(input)]
+        angle = [bus_voltage_angle(input, i) for i in 1:num_buses(input)]
+        scheduled = zeros(ComplexF64, num_buses(input))
+        for i in 1:num_generators(input)
+            scheduled[generator_bus_idx(input, i)] +=
+                generator_active_power(input, i) + im * generator_reactive_power(input, i)
+        end
+        for i in 1:num_loads(input)
+            scheduled[load_bus_idx(input, i)] -=
+                load_active_power(input, i) + im * load_reactive_power(input, i)
+        end
+
+        mismatch = power_injection(v, angle, ybus(input)) .- scheduled
+        @test maximum(abs, mismatch) * base_power(input) < 1e-4 # MVA
+
+        add_sis45b_dynamics!(input)
+        @test num_dynamic_generators(input) == 10
+        @test num_dynamic_loads(input) == 24
+        @test all(
+            classic_generator_inertia_constant(input, k) > 0 &&
+            classic_generator_transient_reactance(input, k) > 0 for k in 1:10
+        )
     end
 end

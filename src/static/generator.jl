@@ -23,8 +23,10 @@ generator_reactive_power(input, idx::Int) = input.static.generators[idx].reactiv
 generator_voltage_setpoint(input, idx::Int) = input.static.generators[idx].voltage_setpoint
 generator_min_active_power(input, idx::Int) = input.static.generators[idx].min_active_power
 generator_max_active_power(input, idx::Int) = input.static.generators[idx].max_active_power
-generator_min_reactive_power(input, idx::Int) = input.static.generators[idx].min_reactive_power
-generator_max_reactive_power(input, idx::Int) = input.static.generators[idx].max_reactive_power
+generator_min_reactive_power(input, idx::Int) =
+    input.static.generators[idx].min_reactive_power
+generator_max_reactive_power(input, idx::Int) =
+    input.static.generators[idx].max_reactive_power
 generator_cost(input, idx::Int) = input.static.generators[idx].cost
 
 num_generators(input) = length(input.static.generators)

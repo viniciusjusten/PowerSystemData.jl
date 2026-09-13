@@ -36,9 +36,12 @@ voltage_phasor(v::Float64, angle::Float64) = v * exp(im * angle)
 voltage_real(v::Float64, angle::Float64) = v * cos(angle)
 voltage_imag(v::Float64, angle::Float64) = v * sin(angle)
 
-current_injection(V::AbstractVector{ComplexF64}, Ybus::AbstractMatrix{ComplexF64}) = Ybus * V
-current_injection_real(v, angle, Ybus::AbstractMatrix{ComplexF64}) = real.(current_injection(voltage_phasor.(v, angle), Ybus))
-current_injection_imag(v, angle, Ybus::AbstractMatrix{ComplexF64}) = imag.(current_injection(voltage_phasor.(v, angle), Ybus))
+current_injection(V::AbstractVector{ComplexF64}, Ybus::AbstractMatrix{ComplexF64}) =
+    Ybus * V
+current_injection_real(v, angle, Ybus::AbstractMatrix{ComplexF64}) =
+    real.(current_injection(voltage_phasor.(v, angle), Ybus))
+current_injection_imag(v, angle, Ybus::AbstractMatrix{ComplexF64}) =
+    imag.(current_injection(voltage_phasor.(v, angle), Ybus))
 
 function power_injection(v, angle, Ybus::AbstractMatrix{ComplexF64})
     V = voltage_phasor.(v, angle)
