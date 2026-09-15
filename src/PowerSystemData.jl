@@ -9,6 +9,7 @@ include("static/bus.jl")
 include("static/branch.jl")
 include("static/generator.jl")
 include("static/load.jl")
+include("static/dcline.jl")
 include("static/static.jl")
 
 include("dynamic/generator.jl")
@@ -67,6 +68,23 @@ export Generator,
     num_generators
 export Load,
     add_load!, load_name, load_bus_idx, load_active_power, load_reactive_power, num_loads
+export DCLine,
+    add_dcline!,
+    dcline_name,
+    dcline_from_bus_idx,
+    dcline_to_bus_idx,
+    dcline_active_power,
+    dcline_reactive_power_from,
+    dcline_reactive_power_to,
+    dcline_constant_loss,
+    dcline_loss_coefficient,
+    dcline_max_flow_from_to,
+    dcline_max_flow_to_from,
+    dcline_min_reactive_power_from,
+    dcline_max_reactive_power_from,
+    dcline_min_reactive_power_to,
+    dcline_max_reactive_power_to,
+    num_dclines
 
 export DynamicGenerator,
     ClassicGenerator,

@@ -79,6 +79,43 @@ end
         @test load_reactive_power(input, 1) == 0.3
     end
 
+    @testset "dcline" begin
+        input = build_test_system()
+        add_dcline!(
+            input;
+            name = "DC1",
+            from_bus_idx = 1,
+            to_bus_idx = 2,
+            active_power = 0.4,
+            reactive_power_from = 0.05,
+            reactive_power_to = -0.02,
+            constant_loss = 0.01,
+            loss_coefficient = 0.02,
+            max_flow_from_to = 0.6,
+            max_flow_to_from = 0.5,
+            min_reactive_power_from = -0.2,
+            max_reactive_power_from = 0.2,
+            min_reactive_power_to = -0.2,
+            max_reactive_power_to = 0.2,
+        )
+
+        @test num_dclines(input) == 1
+        @test dcline_name(input, 1) == "DC1"
+        @test dcline_from_bus_idx(input, 1) == 1
+        @test dcline_to_bus_idx(input, 1) == 2
+        @test dcline_active_power(input, 1) == 0.4
+        @test dcline_reactive_power_from(input, 1) == 0.05
+        @test dcline_reactive_power_to(input, 1) == -0.02
+        @test dcline_constant_loss(input, 1) == 0.01
+        @test dcline_loss_coefficient(input, 1) == 0.02
+        @test dcline_max_flow_from_to(input, 1) == 0.6
+        @test dcline_max_flow_to_from(input, 1) == 0.5
+        @test dcline_min_reactive_power_from(input, 1) == -0.2
+        @test dcline_max_reactive_power_from(input, 1) == 0.2
+        @test dcline_min_reactive_power_to(input, 1) == -0.2
+        @test dcline_max_reactive_power_to(input, 1) == 0.2
+    end
+
     @testset "dynamic collections" begin
         input = build_test_system()
 
