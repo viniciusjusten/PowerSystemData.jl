@@ -6,6 +6,14 @@ Base.@kwdef mutable struct Branch
     reactance::Float64 = 0.0 # p.u.
     shunt_conductance::Float64 = 0.0 # p.u.
     shunt_susceptance::Float64 = 0.0 # p.u.
+    # Off-nominal tap ratio, read as-is from Matpower/PowerModels' `tap` column (no inversion).
+    # Follows the Matpower/PowerModels convention (see makeYbus.m / PowerModels.jl's
+    # constraint_ohms_yt_from/_to): the series admittance is divided by tap_ratio on the from-bus
+    # side, the to-bus side is unscaled. In ybus/branch_admittance_terms terms (y = series
+    # admittance, shift = phase_shift):
+    #   Yff = y / tap_ratio^2 + shunt   Yft = -y / tap_ratio * cis(shift)
+    #   Ytt = y + shunt                 Ytf = -y / tap_ratio * cis(-shift)
+    # tap = Vf / Vt (https://matpower.org/docs/ref/matpower5.0/caseformat.html)
     tap_ratio::Float64 = 1.0
     min_tap_ratio::Float64 = tap_ratio
     max_tap_ratio::Float64 = tap_ratio

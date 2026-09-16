@@ -15,10 +15,10 @@ function ybus(input)
         g_sh = branch_shunt_conductance(input, i)
         b_sh = branch_shunt_susceptance(input, i)
 
-        Y[from, from] += y * tap^2 + g_sh + im * b_sh
+        Y[from, from] += y / tap^2 + g_sh + im * b_sh
         Y[to, to] += y + g_sh + im * b_sh
-        Y[from, to] -= y * tap * exp(im * shift)
-        Y[to, from] -= y * tap * exp(-im * shift)
+        Y[from, to] -= y / tap * exp(im * shift)
+        Y[to, from] -= y / tap * exp(-im * shift)
     end
 
     for i in 1:n
