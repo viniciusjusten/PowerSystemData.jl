@@ -8,7 +8,7 @@ Base.@kwdef mutable struct Generator
     max_active_power::Float64 = Inf # p.u.
     min_reactive_power::Float64 = -Inf # p.u.
     max_reactive_power::Float64 = Inf # p.u.
-    cost::Float64 = 0.0 # $/MWh
+    cost::Float64 = 0.0 # $ per p.u. of active power (matches the p.u. convention used for Pg)
 end
 
 function add_generator!(input; kwargs...)

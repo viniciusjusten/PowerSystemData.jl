@@ -10,7 +10,7 @@ Base.@kwdef mutable struct Branch
     min_tap_ratio::Float64 = tap_ratio
     max_tap_ratio::Float64 = tap_ratio
     phase_shift::Float64 = 0.0 # rad
-    max_flow::Float64 = Inf # MVA
+    max_flow::Float64 = Inf # p.u.
     is_transformer::Bool = false
 end
 

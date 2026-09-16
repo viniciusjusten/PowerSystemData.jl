@@ -274,7 +274,7 @@ end
 
         @test branch_from_bus_idx(input, 1) == 1
         @test branch_to_bus_idx(input, 1) == 2
-        @test branch_max_flow(input, 1) == 100.0
+        @test branch_max_flow(input, 1) == 1.0
         @test branch_tap_ratio(input, 1) == 1.02
         @test branch_is_transformer(input, 1) == true
 
@@ -295,7 +295,7 @@ end
         @test generator_bus_idx(input, 1) == 1
         @test generator_max_active_power(input, 1) == 2.0
         @test generator_max_reactive_power(input, 1) == 999.9
-        @test generator_cost(input, 1) == 20.0
+        @test generator_cost(input, 1) == 2000.0
 
         @test load_bus_idx(input, 1) == 2
         @test load_reactive_power(input, 1) == 0.3

@@ -8,10 +8,12 @@ function _powermodels_bus_type(pm_type::Int)
     end
 end
 
-function _powermodels_generator_cost(gen::AbstractDict, base_power::Float64)
+function _powermodels_generator_cost(gen::AbstractDict)
     # Only the linear term of a polynomial cost curve is kept, since Generator
-    # has a single $/MWh field; the curve is stored per unit of base_power in
-    # the PowerModels dict, so it is rescaled back to real $/MWh here.
+    # has a single cost field. The per-unit PowerModels dict already rescales
+    # that coefficient for use against a per-unit Pg (cost_pu = cost_real *
+    # base_power), which is exactly the convention Generator.cost uses, so it
+    # is taken as-is with no further rescaling.
     if Int(get(gen, "model", 2)) != 2
         return 0.0
     end
@@ -19,7 +21,7 @@ function _powermodels_generator_cost(gen::AbstractDict, base_power::Float64)
     if length(coeffs) < 2
         return 0.0
     end
-    return coeffs[end-1] / base_power
+    return coeffs[end-1]
 end
 
 """
@@ -74,10 +76,11 @@ function from_powermodels(data::AbstractDict)
             tap = 1.0
         end
         # rate_a == 0 is the Matpower convention for "unlimited"; both that
-        # and a missing key fall back to the 999.9 MVA sentinel.
+        # and a missing key fall back to the 999.9 p.u. sentinel. rate_a
+        # itself is already p.u. in the per-unit PowerModels dict.
         max_flow = 999.9
         if haskey(branch, "rate_a") && branch["rate_a"] > 0
-            max_flow = Float64(branch["rate_a"]) * base_power
+            max_flow = Float64(branch["rate_a"])
         end
         add_branch!(
             input;
@@ -136,7 +139,7 @@ function from_powermodels(data::AbstractDict)
             max_active_power = Float64(get(gen, "pmax", 999.9)),
             min_reactive_power = Float64(get(gen, "qmin", -999.9)),
             max_reactive_power = Float64(get(gen, "qmax", 999.9)),
-            cost = _powermodels_generator_cost(gen, base_power),
+            cost = _powermodels_generator_cost(gen),
         )
     end
 
