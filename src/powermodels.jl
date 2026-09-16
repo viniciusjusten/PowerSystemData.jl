@@ -27,8 +27,9 @@ end
 
 Convert a PowerModels network data dictionary (as returned by
 `PowerModels.parse_file`, with `data["per_unit"] == true`) into an `Input`.
-Only the static `bus`, `branch`, `gen`, `load`, and `shunt` components are
-translated; other components (storage, switches, DC lines, ...) are ignored.
+Only the static `bus`, `branch`, `gen`, `load`, `shunt`, and `dcline`
+components are translated; other components (storage, switches, ...) are
+ignored.
 """
 function from_powermodels(data::AbstractDict)
     if !get(data, "per_unit", true)
@@ -91,6 +92,32 @@ function from_powermodels(data::AbstractDict)
             phase_shift = Float64(get(branch, "shift", 0.0)),
             max_flow = max_flow,
             is_transformer = Bool(get(branch, "transformer", false)),
+        )
+    end
+
+    for dcline in sort(collect(values(get(data, "dcline", Dict{String,Any}()))); by = d -> d["index"])
+        if Int(get(dcline, "br_status", 1)) == 0
+            continue
+        end
+        add_dcline!(
+            input;
+            name = string(get(dcline, "name", "DCLine $(dcline["index"])")),
+            from_bus_idx = bus_idx[Int(dcline["f_bus"])],
+            to_bus_idx = bus_idx[Int(dcline["t_bus"])],
+            active_power = Float64(dcline["pf"]),
+            # PowerModels stores qf/qt in its own "leaving the bus" convention, the opposite of
+            # Matpower's dcline table, where Qf/Qt are the reactive power injected into the AC
+            # network (which is what DCLine's reactive_power_from/_to fields represent)
+            reactive_power_from = -Float64(dcline["qf"]),
+            reactive_power_to = -Float64(dcline["qt"]),
+            constant_loss = Float64(dcline["loss0"]),
+            loss_coefficient = Float64(dcline["loss1"]),
+            max_flow_from_to = Float64(dcline["pmaxf"]),
+            max_flow_to_from = -Float64(dcline["pminf"]),
+            min_reactive_power_from = Float64(dcline["qminf"]),
+            max_reactive_power_from = Float64(dcline["qmaxf"]),
+            min_reactive_power_to = Float64(dcline["qmint"]),
+            max_reactive_power_to = Float64(dcline["qmaxt"]),
         )
     end
 

@@ -218,6 +218,26 @@ end
                     "transformer" => true,
                 ),
             ),
+            "dcline" => Dict{String,Any}(
+                "1" => Dict{String,Any}(
+                    "index" => 1,
+                    "f_bus" => 1,
+                    "t_bus" => 2,
+                    "br_status" => 1,
+                    "pf" => 0.3,
+                    "pt" => -0.284,
+                    "qf" => -0.05,
+                    "qt" => 0.02,
+                    "loss0" => 0.01,
+                    "loss1" => 0.02,
+                    "pminf" => -0.1,
+                    "pmaxf" => 0.4,
+                    "qminf" => -0.15,
+                    "qmaxf" => 0.15,
+                    "qmint" => -0.1,
+                    "qmaxt" => 0.1,
+                ),
+            ),
             "gen" => Dict{String,Any}(
                 "1" => Dict{String,Any}(
                     "index" => 1,
@@ -246,6 +266,7 @@ end
         @test num_branches(input) == 1
         @test num_generators(input) == 1
         @test num_loads(input) == 1
+        @test num_dclines(input) == 1
 
         @test bus_type(input, 1) == BusType.Slack
         @test bus_type(input, 2) == BusType.PQ
@@ -256,6 +277,20 @@ end
         @test branch_max_flow(input, 1) == 100.0
         @test branch_tap_ratio(input, 1) == 1.02
         @test branch_is_transformer(input, 1) == true
+
+        @test dcline_from_bus_idx(input, 1) == 1
+        @test dcline_to_bus_idx(input, 1) == 2
+        @test dcline_active_power(input, 1) == 0.3
+        @test dcline_reactive_power_from(input, 1) ≈ 0.05
+        @test dcline_reactive_power_to(input, 1) ≈ -0.02
+        @test dcline_constant_loss(input, 1) == 0.01
+        @test dcline_loss_coefficient(input, 1) == 0.02
+        @test dcline_max_flow_from_to(input, 1) == 0.4
+        @test dcline_max_flow_to_from(input, 1) ≈ 0.1
+        @test dcline_min_reactive_power_from(input, 1) == -0.15
+        @test dcline_max_reactive_power_from(input, 1) == 0.15
+        @test dcline_min_reactive_power_to(input, 1) == -0.1
+        @test dcline_max_reactive_power_to(input, 1) == 0.1
 
         @test generator_bus_idx(input, 1) == 1
         @test generator_max_active_power(input, 1) == 2.0
