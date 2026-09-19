@@ -20,6 +20,7 @@ generator_name(input, idx::Int) = input.static.generators[idx].name
 generator_bus_idx(input, idx::Int) = input.static.generators[idx].bus_idx
 generator_active_power(input, idx::Int) = input.static.generators[idx].active_power
 generator_reactive_power(input, idx::Int) = input.static.generators[idx].reactive_power
+# TODO - voltage setpoint should come from the bus, not the generator. Remove this from the Generator struct and update the formulations in PowerFlow and PowerDynamics
 generator_voltage_setpoint(input, idx::Int) = input.static.generators[idx].voltage_setpoint
 generator_min_active_power(input, idx::Int) = input.static.generators[idx].min_active_power
 generator_max_active_power(input, idx::Int) = input.static.generators[idx].max_active_power

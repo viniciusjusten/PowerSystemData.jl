@@ -15,7 +15,9 @@ function ybus(input)
         g_sh = branch_shunt_conductance(input, i)
         b_sh = branch_shunt_susceptance(input, i)
 
-        Y[from, from] += y / tap^2 + g_sh + im * b_sh
+        # Matpower makeYbus.m: Yff = (Ys + im * Bc / 2) / tap^2, i.e. the branch shunt is divided
+        # by tap^2 together with the series admittance; the to-bus side is unscaled.
+        Y[from, from] += (y + g_sh + im * b_sh) / tap^2
         Y[to, to] += y + g_sh + im * b_sh
         Y[from, to] -= y / tap * exp(im * shift)
         Y[to, from] -= y / tap * exp(-im * shift)

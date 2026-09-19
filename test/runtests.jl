@@ -162,6 +162,34 @@ end
         @test Z * Y ≈ Matrix{ComplexF64}(I, 2, 2) atol = 1e-8
     end
 
+    @testset "ybus follows makeYbus for a tapped branch with a shunt" begin
+        input = Input()
+        add_bus!(input; name = "B1")
+        add_bus!(input; name = "B2")
+        add_branch!(
+            input;
+            name = "T12",
+            from_bus_idx = 1,
+            to_bus_idx = 2,
+            resistance = 0.01,
+            reactance = 0.1,
+            shunt_susceptance = 0.03,
+            tap_ratio = 1.05,
+            phase_shift = 0.02,
+            is_transformer = true,
+        )
+
+        # Matpower makeYbus.m, with tap = ratio * exp(im * shift):
+        #   Ytt = Ys + im * Bc / 2   Yff = Ytt / (tap * conj(tap))
+        #   Yft = -Ys / conj(tap)    Ytf = -Ys / tap
+        y_series = 1 / (0.01 + im * 0.1)
+        tap = 1.05 * exp(im * 0.02)
+        Ytt = y_series + im * 0.03
+        expected = [Ytt/(tap * conj(tap)) -y_series/conj(tap); -y_series/tap Ytt]
+
+        @test ybus(input) ≈ expected atol = 1e-10
+    end
+
     @testset "voltage / current / power helpers" begin
         input = build_test_system()
         Y = ybus(input)
