@@ -1,12 +1,14 @@
-# based on MATPOWER's dcline data structure
+# based on MATPOWER's dcline data structure, but with PowerModels' sign convention: every power
+# quantity is the power leaving the AC bus and entering the DC line at that terminal. The reactive
+# limits bound those same quantities.
 
 Base.@kwdef mutable struct DCLine
     name::String = ""
     from_bus_idx::Int = 0
     to_bus_idx::Int = 0
     active_power::Float64 = 0.0 # p.u., flow scheduled to leave the from-bus terminal, before losses
-    reactive_power_from::Float64 = 0.0 # p.u., scheduled reactive power injected at the from-bus terminal
-    reactive_power_to::Float64 = 0.0 # p.u., scheduled reactive power injected at the to-bus terminal
+    reactive_power_from::Float64 = 0.0 # p.u., scheduled reactive power leaving the from-bus into the DC line
+    reactive_power_to::Float64 = 0.0 # p.u., scheduled reactive power leaving the to-bus into the DC line
     constant_loss::Float64 = 0.0 # p.u., constant term of the linear active power loss model
     loss_coefficient::Float64 = 0.0 # fraction of the from-bus flow lost in the line
     max_flow_from_to::Float64 = Inf # p.u., active power flow limit in the from -> to direction

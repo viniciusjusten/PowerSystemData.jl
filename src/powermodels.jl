@@ -108,11 +108,10 @@ function from_powermodels(data::AbstractDict)
             from_bus_idx = bus_idx[Int(dcline["f_bus"])],
             to_bus_idx = bus_idx[Int(dcline["t_bus"])],
             active_power = Float64(dcline["pf"]),
-            # PowerModels stores qf/qt in its own "leaving the bus" convention, the opposite of
-            # Matpower's dcline table, where Qf/Qt are the reactive power injected into the AC
-            # network (which is what DCLine's reactive_power_from/_to fields represent)
-            reactive_power_from = -Float64(dcline["qf"]),
-            reactive_power_to = -Float64(dcline["qt"]),
+            # PowerModels stores qf/qt and their limits as the reactive power leaving the bus into
+            # the DC line, which is the convention DCLine uses, so they are copied unchanged
+            reactive_power_from = Float64(dcline["qf"]),
+            reactive_power_to = Float64(dcline["qt"]),
             constant_loss = Float64(dcline["loss0"]),
             loss_coefficient = Float64(dcline["loss1"]),
             max_flow_from_to = Float64(dcline["pmaxf"]),
