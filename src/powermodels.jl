@@ -94,6 +94,9 @@ function from_powermodels(data::AbstractDict)
             tap_ratio = tap,
             phase_shift = Float64(get(branch, "shift", 0.0)),
             max_flow = max_flow,
+            # angmin/angmax are already in radians in the PowerModels dict
+            min_angle_difference = Float64(get(branch, "angmin", -pi / 3)),
+            max_angle_difference = Float64(get(branch, "angmax", pi / 3)),
             is_transformer = Bool(get(branch, "transformer", false)),
         )
     end

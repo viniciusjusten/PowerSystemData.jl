@@ -19,6 +19,9 @@ Base.@kwdef mutable struct Branch
     max_tap_ratio::Float64 = tap_ratio
     phase_shift::Float64 = 0.0 # rad
     max_flow::Float64 = Inf # p.u.
+    # rad, limits on the angle of the from-bus minus the angle of the to-bus
+    min_angle_difference::Float64 = -pi / 3
+    max_angle_difference::Float64 = pi / 3
     is_transformer::Bool = false
 end
 
@@ -39,6 +42,8 @@ branch_min_tap_ratio(input, idx::Int) = input.static.branches[idx].min_tap_ratio
 branch_max_tap_ratio(input, idx::Int) = input.static.branches[idx].max_tap_ratio
 branch_phase_shift(input, idx::Int) = input.static.branches[idx].phase_shift
 branch_max_flow(input, idx::Int) = input.static.branches[idx].max_flow
+branch_min_angle_difference(input, idx::Int) = input.static.branches[idx].min_angle_difference
+branch_max_angle_difference(input, idx::Int) = input.static.branches[idx].max_angle_difference
 branch_is_transformer(input, idx::Int) = input.static.branches[idx].is_transformer
 
 num_branches(input) = length(input.static.branches)
